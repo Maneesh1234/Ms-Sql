@@ -1,0 +1,257 @@
+To Create the database using a query
+Create database Sample2
+To alter a database, once it's created  Or Rename Database
+Alter database Sample2 Modify Name = Sample3
+Alternatively, you can also use system stored procedure
+Execute sp_renameDB 'OldDatabaseName','NewDatabaseName'
+Execute sp_renameDB 'Sample3','Sample4'
+To Delete or Drop a database
+Drop Database DatabaseThatYouWantToDrop
+Drop Database Sample4
+
+You cannot drop a database, if it is currently in use. You get an error stating - Cannot drop database "NewDatabaseName" because it is currently in use. So, if other users are connected, you need to put the database in single user mode and then drop the database.
+Alter Database DatabaseName Set SINGLE_USER With Rollback Immediate
+
+
+With Rollback Immediate option, will rollback all incomplete transactions and closes the connection to the database.
+Note: System databases cannot be dropped.
+Drop Database master
+Cannot drop the database 'master' because it is a system database.
+Create database Sample
+Creating and Working with tables
+ 
+Create Table tblGender
+(ID int Not Null Primary Key,
+Gender nvarchar(50))
+
+How To change one database to another
+use  [databasename]
+Go
+
+use  [Sample]
+Go
+To add a foreign key reference using a query
+Alter table tblPerson 
+add constraint tblPerson_GenderId_FK FOREIGN KEY (GenderId) references tblGender(ID)
+The general formula is here
+Alter table ForeignKeyTable add constraint ForeignKeyTable_ForiegnKeyColumn_FK 
+FOREIGN KEY (ForiegnKeyColumn) references PrimaryKeyTable (PrimaryKeyColumn)
+
+Select Query
+Select * from tblGender
+1	Male
+2	Female
+Select * from tblPerson
+1	john	j@.com	1
+2	marry	m@.com	2
+
+Insert Into table
+Insert into tblPerson(ID,Name,Email,GenderId) values(3,'Sam','s@s.com',1)
+Insert into tblPerson(ID,Name,Email,GenderId) values(4,'ram','r@s.com',1)
+Insert into tblPerson(ID,Name,Email,GenderId) values(5,'Manish','m@s.com',1)
+Insert into tblPerson(ID,Name,Email,GenderId) values(6,'Dyna','d@s.com',2)
+Insert into tblPerson(ID,Name,Email) values(7,'raju','s@s.com')
+
+Select * from tblPerson
+
+1	john	j@.com		1
+2	marry	m@.com		2
+3	Sam	s@s.com	1
+4	ram	r@s.com	1
+5	Manish	m@s.com	1
+6	Dyna	d@s.com	2
+7	raju	s@s.com	NULL
+
+Adding Default Constraint
+Altering an existing column to add a default constraint:
+ALTER TABLE { TABLE_NAME }
+ADD CONSTRAINT { CONSTRAINT_NAME }
+DEFAULT { DEFAULT_VALUE } FOR { EXISTING_COLUMN_NAME }
+
+ALTER TABLE tblPerson
+ADD CONSTRAINT DF_tblPerson_GenderId
+DEFAULT 3 FOR GenderId
+
+Insert into tblPerson(ID,Name,Email) values(8,'Sam','s@s.com')
+
+Select * from tblPerson
+ID	Name	Email	GenderId
+1	john	j@.com	1
+2	marry	m@.com	2
+3	Sam	s@s.com	1
+4	ram	r@s.com	1
+5	Manish	m@s.com	1
+6	Dyna	d@s.com	2
+7	raju	s@s.com	NULL
+8	Sam	s@s.com	3
+
+Insert into tblPerson(ID,Name,Email,GenderId) values(9,'Gam','g@s.com',NULL)
+ID	Name	Email	GenderId
+1	john	j@.com	1
+2	marry	m@.com	2
+3	Sam	s@s.com	1
+4	ram	r@s.com	1
+5	Manish	m@s.com	1
+6	Dyna	d@s.com	2
+7	raju	s@s.com	NULL
+8	Sam	s@s.com	3
+9	Gam	g@s.com	NULL
+
+
+Adding a new column, with default value, to an existing table:
+ALTER TABLE { TABLE_NAME } 
+ADD { COLUMN_NAME } { DATA_TYPE } { NULL | NOT NULL } 
+CONSTRAINT { CONSTRAINT_NAME } DEFAULT { DEFAULT_VALUE }
+
+To drop a constraint
+ALTER TABLE { TABLE_NAME } 
+DROP CONSTRAINT { CONSTRAINT_NAME }
+
+ALTER TABLE tblPerson 
+DROP CONSTRAINT DF_tblPerson_GenderId
+
+Cascade Integrity Constraint
+Delete from table
+Delete from tblGender Where ID=2
+Adding new column
+ALTER TABLE tblPerson
+ADD Age int NULL 
+
+Select * from tblPerson
+ID	Name	Email	GenderId	Age
+1	john	j@.com	1	NULL
+2	marry	m@.com	3	NULL
+3	Sam	s@s.com	1	NULL
+4	ram	r@s.com	1	NULL
+5	Manish	m@s.com	1	NULL
+6	Dyna	d@s.com	3	NULL
+7	raju	s@s.com	NULL	NULL
+8	Sam	s@s.com	3	NULL
+9	Gam	g@s.com	NULL	NULL
+
+Insert into tblPerson(ID,Name,Email,GenderId,Age) values(10,'rock','r@s.com',1,87)
+
+The following check constraint, limits the age between ZERO and 150.
+ALTER TABLE tblPerson
+ADD CONSTRAINT CK_tblPerson_Age CHECK (Age > 0 AND Age < 150)
+Insert into tblPerson(ID,Name,Email,GenderId,Age) values(10,'rock','r@s.com',1,-87)
+After adding above constraint insert will gives error because negative value will not allow in check statement.
+
+
+The general formula for adding check constraint in SQL Server:
+ALTER TABLE { TABLE_NAME }
+ADD CONSTRAINT { CONSTRAINT_NAME } CHECK ( BOOLEAN_EXPRESSION )
+
+
+To drop the CHECK constraint:
+ALTER TABLE tblPerson
+DROP CONSTRAINT CK_tblPerson_Age
+
+Identity in Table
+Identity(seed,increment)
+Create Table tblPerson1
+(
+PersonId int Identity(1,1) Primary Key,
+Name nvarchar(20)
+)
+Insert into tblPerson1 values ('Sam')
+Insert into tblPerson1 values ('Sara')
+Insert into tblPerson1 values ('Sara')
+
+Select * from tblPerson1
+PersonId	Name
+1	Sam
+2	Sara
+3	Sara
+
+Delete from tblPerson1 Where PersonID=1
+
+Select * from tblPerson1
+PersonId	Name
+2	Sara
+3	Sara
+
+Insert into tblPerson1 values ('Todd')
+Select * from tblPerson1
+PersonId	Name
+2	Sara
+3	Sara
+4	Todd
+
+Insert into tblPerson1 values (1,'jane')
+It will gives error
+
+It will Solves by
+ SET Identity_Insert tblPerson1 ON
+Insert into tblPerson1 (PersonId, Name)values (1,'jane')
+Select * from tblPerson1
+PersonId	Name
+1	jane
+2	Sara
+3	Sara
+4	Todd
+
+Insert into tblPerson1 values ('maneesh')
+Again It will gives error
+
+It will Solved by
+SET Identity_Insert tblPerson1 OFF
+Insert into tblPerson1 values ('maneesh')
+Select * from tblPerson1
+PersonId	Name
+1	jane
+2	Sara
+3	Sara
+4	Todd
+5	maneesh
+
+Delete from tblPerson1 
+Select * from tblPerson1
+PersonId	Name
+
+Insert into tblPerson1 values ('maneesh')
+Select * from tblPerson1
+PersonId	Name
+6	maneesh
+
+Delete from tblPerson1 
+Select * from tblPerson1
+DBCC CHECKIDENT(tblPerson1, RESEED, 0)
+Insert into tblPerson1 values ('maneesh')
+Select * from tblPerson1
+PersonId	Name
+1	maneesh
+
+Drop Table Test1
+Drop Table Test2
+Create Table Test1
+(
+Id int Identity(1,1) ,
+Value nvarchar(20)
+)
+Create Table Test2
+(
+Id int Identity(1,1) ,
+Value nvarchar(20)
+)
+
+Insert into Test1 values ('X')
+Select * from Test1
+
+Insert into Test1 values ('X')
+Insert into Test1 values ('X')
+Select * from Test1
+Id	Value
+1	X
+2	X
+3	X
+
+Select SCOPE_IDENTITY()- 
+(No column name)
+3
+It return last generated Identity value
+
+Same is done with this-
+Select @@IDENTITY
+(No column name)
+3
